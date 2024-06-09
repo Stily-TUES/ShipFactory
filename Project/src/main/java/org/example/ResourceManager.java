@@ -9,11 +9,11 @@ public class ResourceManager {
     private int gold = 0;
     private int ships = 0;
 
-    private Semaphore woodSemaphore = new Semaphore(1);
-    private Semaphore steelSemaphore = new Semaphore(1);
-    private Semaphore clothSemaphore = new Semaphore(1);
-    private Semaphore goldSemaphore = new Semaphore(1);
-    private Semaphore shipsSemaphore = new Semaphore(1);
+    private final Semaphore woodSemaphore = new Semaphore(1);
+    private final Semaphore steelSemaphore = new Semaphore(1);
+    private final Semaphore clothSemaphore = new Semaphore(1);
+    private final Semaphore goldSemaphore = new Semaphore(1);
+    private final Semaphore shipsSemaphore = new Semaphore(1);
 
     // Add methods with semaphore protection
     public void addWood(int amount) {
@@ -71,7 +71,6 @@ public class ResourceManager {
         }
     }
 
-    // Remove methods with semaphore protection
     public void removeShips(int amount) {
         try {
             shipsSemaphore.acquire();
@@ -87,7 +86,6 @@ public class ResourceManager {
         }
     }
 
-    // Resource checking and consumption methods
     public boolean hasEnoughShips(int amount) {
         try {
             shipsSemaphore.acquire();
@@ -103,10 +101,8 @@ public class ResourceManager {
     public boolean consumeResources(int woodAmount, int steelAmount, int clothAmount) {
         boolean acquired = false;
         try {
-            // Try to acquire all necessary semaphores
             if (woodSemaphore.tryAcquire() && steelSemaphore.tryAcquire() && clothSemaphore.tryAcquire()) {
                 acquired = true;
-                // Check if resources are sufficient
                 if (wood >= woodAmount && steel >= steelAmount && cloth >= clothAmount) {
                     wood -= woodAmount;
                     steel -= steelAmount;

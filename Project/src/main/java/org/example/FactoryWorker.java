@@ -1,12 +1,13 @@
 package org.example;
+import java.util.concurrent.Semaphore;
 
 public abstract class FactoryWorker extends Thread {
     protected int output;
     protected int totalProduced = 0;
     protected Clock clock;
     protected ResourceManager resourceManager;
-    protected static final int MAX_ACTIVE = 5; // Maximum active workers
-    protected static java.util.concurrent.Semaphore semaphore = new java.util.concurrent.Semaphore(MAX_ACTIVE);
+    protected static final int MAX_ACTIVE = 10;
+    protected static Semaphore semaphore = new Semaphore(MAX_ACTIVE);
 
     public FactoryWorker(int output, Clock clock, ResourceManager resourceManager) {
         this.output = output;

@@ -23,22 +23,20 @@ public class Main {
     private static final int MAX_LOADED_THREADS = 10;
     private static int loadedThreads = 0;
 
-    public static synchronized boolean loadThread(Thread thread) {
+    public static synchronized void loadThread(Thread thread) {
         if (loadedThreads < MAX_LOADED_THREADS) {
             loadedThreads++;
             thread.start();
-            return true;
         }
-        return false;
     }
 
     public static void main(String[] args) {
-        clock.start();  // Start the clock thread
+        clock.start();
         loadThread(woodWorker);
         loadThread(steelWorker);
         loadThread(clothWorker);
-        missionManager.start();  // Start the mission manager thread
-        new Thread(Main::handleUserInput).start();  // Handle user input in a separate thread
+        missionManager.start();
+        new Thread(Main::handleUserInput).start();
     }
 
     private static void handleUserInput() {
@@ -70,6 +68,10 @@ public class Main {
     }
 
     private static void buildFactory() {
+        if (woodFactoryCount + steelFactoryCount + clothFactoryCount >= 10) {
+            System.out.println("You can't build more than 10 factories.");
+            return;
+        }
         System.out.println("Which factory to build? (wood, steel, cloth, ship)");
         String factoryType = scanner.nextLine();
         if (resourceManager.consumeResources(10, 5, 5)) {
@@ -142,7 +144,7 @@ public class Main {
     private static void sendShipsOnMission() {
         System.out.println("Enter the number of ships to send on the mission (max 20):");
         int numShips = scanner.nextInt();
-        scanner.nextLine();  // Consume the newline left-over
+        scanner.nextLine();
 
         if (numShips > 20) {
             System.out.println("You can only send a maximum of 20 ships.");
