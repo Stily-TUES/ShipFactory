@@ -1,4 +1,5 @@
 package org.example;
+
 public class Clock extends Thread {
     private int hours = 0;
     private int days = 0;
@@ -12,7 +13,7 @@ public class Clock extends Thread {
     public void run() {
         while (running) {
             try {
-                Thread.sleep(3000); // 3 seconds for an hour
+                Thread.sleep(3000); // Simulates an hour in 3 seconds
                 hours++;
                 if (hours % 24 == 0) {
                     days++;

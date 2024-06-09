@@ -1,10 +1,12 @@
 package org.example;
-abstract class FactoryWorker extends Thread {
+
+public abstract class FactoryWorker extends Thread {
     protected int output;
     protected int totalProduced = 0;
     protected Clock clock;
     protected ResourceManager resourceManager;
-    protected boolean running = true;
+    protected static final int MAX_ACTIVE = 5; // Maximum active workers
+    protected static java.util.concurrent.Semaphore semaphore = new java.util.concurrent.Semaphore(MAX_ACTIVE);
 
     public FactoryWorker(int output, Clock clock, ResourceManager resourceManager) {
         this.output = output;
@@ -13,27 +15,23 @@ abstract class FactoryWorker extends Thread {
     }
 
     public void run() {
-        while (running) {
-            synchronized (clock) {
-                try {
+        while (!Thread.interrupted()) {
+            try {
+                semaphore.acquire();
+                synchronized (clock) {
                     clock.wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
                 }
                 produce();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } finally {
+                semaphore.release();
             }
         }
     }
 
     protected abstract void produce();
 
-    public int getTotalProduced() {
-        return totalProduced;
-    }
-
-    public void stopWorker() {
-        running = false;
-    }
     public void increaseOutputByPercentage(int percentage) {
         output += output * percentage / 100;
     }

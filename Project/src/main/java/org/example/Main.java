@@ -20,15 +20,25 @@ public class Main {
     private static final SteelFactoryWorker steelWorker = new SteelFactoryWorker(50, clock, resourceManager);
     private static final ClothFactoryWorker clothWorker = new ClothFactoryWorker(50, clock, resourceManager);
 
+    private static final int MAX_LOADED_THREADS = 10;
+    private static int loadedThreads = 0;
+
+    public static synchronized boolean loadThread(Thread thread) {
+        if (loadedThreads < MAX_LOADED_THREADS) {
+            loadedThreads++;
+            thread.start();
+            return true;
+        }
+        return false;
+    }
 
     public static void main(String[] args) {
-        clock.start();
-        woodWorker.start();
-        steelWorker.start();
-        clothWorker.start();
-        missionManager.start();
-
-        new Thread(Main::handleUserInput).start();
+        clock.start();  // Start the clock thread
+        loadThread(woodWorker);
+        loadThread(steelWorker);
+        loadThread(clothWorker);
+        missionManager.start();  // Start the mission manager thread
+        new Thread(Main::handleUserInput).start();  // Handle user input in a separate thread
     }
 
     private static void handleUserInput() {
@@ -66,18 +76,18 @@ public class Main {
             switch (factoryType) {
                 case "wood":
                     woodFactoryCount++;
-                    new WoodFactoryWorker(10, clock, resourceManager).start();
+                    loadThread(new WoodFactoryWorker(10, clock, resourceManager));
                     break;
                 case "steel":
                     steelFactoryCount++;
-                    new SteelFactoryWorker(5, clock, resourceManager).start();
+                    loadThread(new SteelFactoryWorker(5, clock, resourceManager));
                     break;
                 case "cloth":
                     clothFactoryCount++;
-                    new ClothFactoryWorker(5, clock, resourceManager).start();
+                    loadThread(new ClothFactoryWorker(5, clock, resourceManager));
                     break;
                 case "ship":
-                    new ShipFactoryWorker(1, clock, resourceManager).start();
+                    loadThread(new ShipFactoryWorker(1, clock, resourceManager));
                     break;
                 default:
                     System.out.println("Unknown factory type");
@@ -132,7 +142,7 @@ public class Main {
     private static void sendShipsOnMission() {
         System.out.println("Enter the number of ships to send on the mission (max 20):");
         int numShips = scanner.nextInt();
-        scanner.nextLine();
+        scanner.nextLine();  // Consume the newline left-over
 
         if (numShips > 20) {
             System.out.println("You can only send a maximum of 20 ships.");
